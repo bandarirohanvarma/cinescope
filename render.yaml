@@ -12,7 +12,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: REDIS_URL
-        sync: false
+        value: ""
       - key: TMDB_API_KEY
         sync: false
       - key: GROQ_API_KEY

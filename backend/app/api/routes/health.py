@@ -19,14 +19,16 @@ async def health(response: Response, session: SessionDep) -> dict:
     except Exception as exc:  # noqa: BLE001 - surface any connection failure
         checks["database"] = f"error: {exc.__class__.__name__}"
 
-    redis = Redis.from_url(get_settings().redis_url)
-    try:
-        await redis.ping()
-        checks["redis"] = "ok"
-    except Exception as exc:  # noqa: BLE001
-        checks["redis"] = f"error: {exc.__class__.__name__}"
-    finally:
-        await redis.aclose()
+    redis_url = get_settings().redis_url
+    if redis_url:
+        redis = Redis.from_url(redis_url)
+        try:
+            await redis.ping()
+            checks["redis"] = "ok"
+        except Exception as exc:  # noqa: BLE001
+            checks["redis"] = f"error: {exc.__class__.__name__}"
+        finally:
+            await redis.aclose()
 
     healthy = all(value == "ok" for value in checks.values())
     if not healthy:

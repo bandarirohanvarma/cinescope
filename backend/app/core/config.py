@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     environment: str = "local"
 
     database_url: str = "postgresql+asyncpg://cinescope:cinescope@localhost:5433/cinescope"
+    # Only the Celery worker needs Redis; set REDIS_URL="" where there is no worker.
     redis_url: str = "redis://localhost:6379/0"
 
     cors_origins: list[str] = ["http://localhost:3000"]
