@@ -1,0 +1,39 @@
+name: Data jobs
+
+# Free replacement for the Celery beat schedule in production.
+on:
+  schedule:
+    - cron: "*/15 * * * *" # reminders
+    - cron: "0 */6 * * *" # TMDB lists (+ embeddings for new movies)
+    - cron: "30 3 * * *" # TMDB changes + Wikipedia
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "Pipeline command (e.g. tmdb-lists, wikipedia, embed, reminders)"
+        required: true
+        default: reminders
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install .
+      - name: Run job
+        run: |
+          case "${{ github.event.schedule }}" in
+            "*/15 * * * *") python -m app.pipeline reminders ;;
+            "0 */6 * * *")  python -m app.pipeline tmdb-lists ;;
+            "30 3 * * *")   python -m app.pipeline tmdb-changes && python -m app.pipeline wikipedia ;;
+            *)              python -m app.pipeline ${{ github.event.inputs.command }} ;;
+          esac

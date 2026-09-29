@@ -1,0 +1,23 @@
+# Render Blueprint: the API as a free Docker web service.
+# Scheduled data jobs run in GitHub Actions (.github/workflows/jobs.yml) instead of a paid worker.
+services:
+  - type: web
+    name: cinescope-api
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: TMDB_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
